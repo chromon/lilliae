@@ -10,7 +10,7 @@ Code_attribute {
 	// 局部变量表大小
 	u2 max_locals;
 	u4 code_length;
-	u1 code[code_length];
+	u1 Code[code_length];
 	u2 exception_table_length;
 	{ 	u2 start_pc;
 		u2 end_pc;
@@ -38,14 +38,6 @@ type CodeAttribute struct {
 	attributes []AttributeInfo
 }
 
-// 异常处理表
-type ExceptionTableEntry struct {
-	startPC uint16
-	endPC uint16
-	handlerPC uint16
-	catchType uint16
-}
-
 // 读取属性信息
 func (ca *CodeAttribute) readInfo(reader *ClassReader) {
 	// 操作数栈的最大深度
@@ -61,6 +53,30 @@ func (ca *CodeAttribute) readInfo(reader *ClassReader) {
 	ca.attributes = readAttributes(reader, ca.cp)
 }
 
+func (ca *CodeAttribute) MaxStack() uint {
+	return uint(ca.maxStack)
+}
+
+func (ca *CodeAttribute) MaxLocals() uint {
+	return uint(ca.maxLocals)
+}
+
+func (ca *CodeAttribute) Code() []byte {
+	return ca.code
+}
+
+// 异常处理表
+type ExceptionTableEntry struct {
+	startPC uint16
+	endPC uint16
+	handlerPC uint16
+	catchType uint16
+}
+
+func (ca *CodeAttribute) ExceptionTable() []*ExceptionTableEntry {
+	return ca.exceptionTable
+}
+
 // 读取异常表
 func readExceptionTable(reader *ClassReader) []*ExceptionTableEntry {
 	exceptionTableLength := reader.readUint16()
@@ -74,4 +90,20 @@ func readExceptionTable(reader *ClassReader) []*ExceptionTableEntry {
 		}
 	}
 	return exceptionTable
+}
+
+func (et *ExceptionTableEntry) StartPC() uint16 {
+	return et.startPC
+}
+
+func (et *ExceptionTableEntry) EndPc() uint16 {
+	return et.endPC
+}
+
+func (et *ExceptionTableEntry) HandlerPC() uint16 {
+	return et.handlerPC
+}
+
+func (et *ExceptionTableEntry) CatchType() uint16 {
+	return et.catchType
 }

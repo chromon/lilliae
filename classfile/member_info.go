@@ -68,3 +68,15 @@ func (mi *MemberInfo) Name() string {
 func (mi *MemberInfo) Descriptor() string {
 	return mi.cp.getUtf8(mi.descriptorIndex)
 }
+
+// 获取 Code 属性
+func (mi *MemberInfo) CodeAttribute() *CodeAttribute {
+	for _, attrInfo := range mi.attributes {
+		// 类型断言
+		switch attrInfo.(type) {
+		case *CodeAttribute:
+			return attrInfo.(*CodeAttribute)
+		}
+	}
+	return nil
+}

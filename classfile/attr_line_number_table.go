@@ -33,3 +33,13 @@ func (lta *LineNumberTableAttribute) readInfo(reader *ClassReader) {
 		}
 	}
 }
+
+func (lta *LineNumberTableAttribute) GetLineNumber(pc int) int {
+	for i := len(lta.lineNumberTable) - 1; i >= 0; i-- {
+		entry := lta.lineNumberTable[i]
+		if pc >= int(entry.startPC) {
+			return int(entry.lineNumber)
+		}
+	}
+	return -1
+}

@@ -23,6 +23,10 @@ func (cii *ConstantIntegerInfo) readInfo(reader *ClassReader) {
 	cii.val = int32(bytes)
 }
 
+func (cii *ConstantIntegerInfo) Value() int32 {
+	return cii.val
+}
+
 /*
 CONSTANT_Float_info {
 	u1 tag;
@@ -39,6 +43,10 @@ type ConstantFloatInfo struct {
 func (cfi *ConstantFloatInfo) readInfo(reader *ClassReader) {
 	bytes := reader.readUint32()
 	cfi.val = math.Float32frombits(bytes)
+}
+
+func (cfi *ConstantFloatInfo) Value() float32 {
+	return cfi.val
 }
 
 /*
@@ -60,6 +68,10 @@ func (cli *ConstantLongInfo) readInfo(reader *ClassReader) {
 	cli.val = int64(bytes)
 }
 
+func (cli *ConstantLongInfo) Value() int64 {
+	return cli.val
+}
+
 /*
 CONSTANT_Double_info {
 	u1 tag;
@@ -77,4 +89,8 @@ type ConstantDoubleInfo struct {
 func (cdi *ConstantDoubleInfo) readInfo(reader *ClassReader) {
 	bytes := reader.readUint64()
 	cdi.val = math.Float64frombits(bytes)
+}
+
+func (cdi *ConstantDoubleInfo) Value() float64 {
+	return cdi.val
 }
