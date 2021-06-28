@@ -2,30 +2,22 @@ package main
 
 import (
 	"fmt"
-	"lilliae/classfile"
 	"lilliae/instructions"
 	"lilliae/instructions/base"
 	"lilliae/runtimedataarea"
+	"lilliae/runtimedataarea/heap"
 )
 
 // 解释器
-func interpret(methodInfo *classfile.MemberInfo) {
-	// 获取 Code 属性
-	codeAttr := methodInfo.CodeAttribute()
-	// 获得执行方法所需的局部变量表
-	maxLocals := codeAttr.MaxLocals()
-	// 操作数栈
-	maxStack := codeAttr.MaxStack()
-	// 方法的字节码
-	bytecode := codeAttr.Code()
+func interpret(method *heap.Method) {
 	// 创建 Thread 实例
 	thread := runtimedataarea.NewThread()
 	// 创建栈帧并推入虚拟机栈顶
-	frame := thread.NewFrame(maxLocals, maxStack)
+	frame := thread.NewFrame(method)
 	thread.PushFrame(frame)
 
 	defer catchErr(frame)
-	loop(thread, bytecode)
+	loop(thread, method.Code())
 }
 
 func catchErr(frame *runtimedataarea.Frame) {

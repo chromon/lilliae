@@ -1,6 +1,9 @@
 package runtimedataarea
 
-import "math"
+import (
+	"lilliae/runtimedataarea/heap"
+	"math"
+)
 
 // 操作数栈
 type OperandStack struct {
@@ -73,13 +76,13 @@ func (ops *OperandStack) PopDouble() float64 {
 }
 
 // 引用类型压入栈顶
-func (ops *OperandStack) PushRef(ref *Object) {
+func (ops *OperandStack) PushRef(ref *heap.Object) {
 	ops.slots[ops.size].ref = ref
 	ops.size++
 }
 
 // 弹出引用类型数据
-func (ops *OperandStack) PopRef() *Object {
+func (ops *OperandStack) PopRef() *heap.Object {
 	ops.size--
 	ref := ops.slots[ops.size].ref
 	// 帮助 GC 回收 ref

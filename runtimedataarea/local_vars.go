@@ -1,6 +1,9 @@
 package runtimedataarea
 
-import "math"
+import (
+	"lilliae/runtimedataarea/heap"
+	"math"
+)
 
 // 局部变量表
 type LocalVars []Slot
@@ -62,12 +65,12 @@ func (lv LocalVars) GetDouble(index uint) float64 {
 	return math.Float64frombits(bits)
 }
 
-// 获取引用类型数据
-func (lv LocalVars) SetRef(index uint, ref *Object) {
+// 存放引用类型数据
+func (lv LocalVars) SetRef(index uint, ref *heap.Object) {
 	lv[index].ref = ref
 }
 
-// 设置引用类型数据
-func (lv LocalVars) GetRef(index uint) *Object {
+// 获取引用类型数据
+func (lv LocalVars) GetRef(index uint) *heap.Object {
 	return lv[index].ref
 }

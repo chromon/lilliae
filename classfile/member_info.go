@@ -80,3 +80,14 @@ func (mi *MemberInfo) CodeAttribute() *CodeAttribute {
 	}
 	return nil
 }
+
+// 获取常量值属性
+func (mi *MemberInfo) ConstantValueAttribute() *ConstantValueAttribute {
+	for _, attrInfo := range mi.attributes {
+		switch attrInfo.(type) {
+		case *ConstantValueAttribute:
+			return attrInfo.(*ConstantValueAttribute)
+		}
+	}
+	return nil
+}

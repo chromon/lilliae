@@ -1,5 +1,7 @@
 package runtimedataarea
 
+import "lilliae/runtimedataarea/heap"
+
 // 线程
 type Thread struct {
 	pc int
@@ -37,6 +39,6 @@ func (t *Thread) CurrentFrame() *Frame {
 	return t.stack.top()
 }
 
-func (t *Thread) NewFrame(maxLocals, maxStack uint) *Frame {
-	return NewFrame(t, maxLocals, maxStack)
+func (t *Thread) NewFrame(method *heap.Method) *Frame {
+	return newFrame(t, method)
 }

@@ -5,6 +5,7 @@ import (
 	"lilliae/classfile"
 	"lilliae/classpath"
 	"lilliae/runtimedataarea"
+	"lilliae/runtimedataarea/heap"
 	"strings"
 )
 
@@ -22,41 +23,17 @@ func main() {
 
 func startJVM(cmd *Cmd) {
 	cp := classpath.Parse(cmd.XjreOption, cmd.cpOption)
+	classLoader := heap.NewClassLoader(cp)
 	className := strings.Replace(cmd.class, ".", "/", -1)
-	// 读取并解析 class 文件
-	cf := loadClass(className, cp)
+	mainClass := classLoader.LoadClass(className)
 	// 查找类的 main 方法
-	mainMethod := getMainMethod(cf)
+	mainMethod := mainClass.GetMainMethod()
 	if mainMethod != nil {
 		// 解释执行 main 方法
 		interpret(mainMethod)
 	} else {
 		fmt.Printf("main method not found in class %s\n", cmd.class)
 	}
-}
-
-// 读取并解析 class 文件
-func loadClass(className string, cp *classpath.Classpath) *classfile.ClassFile {
-	classData, _, err := cp.ReadClass(className)
-	if err != nil {
-		panic(err)
-	}
-
-	cf, err := classfile.Parse(classData)
-	if err != nil {
-		panic(err)
-	}
-	return cf
-}
-
-// 查找类的 main 方法
-func getMainMethod(cf *classfile.ClassFile) *classfile.MemberInfo {
-	for _, m := range cf.Methods() {
-		if m.Name() == "main" && m.Descriptor() == "([Ljava/lang/String;)V" {
-			return m
-		}
-	}
-	return nil
 }
 
 // 打印 class 文件重要信息
