@@ -99,3 +99,10 @@ func (ops *OperandStack) PopSlot() Slot {
 	ops.size--
 	return ops.slots[ops.size]
 }
+
+// 返回距离操作数栈顶 n 个单元格的引用变量
+// 例如：GetRefFromTop(0) 返回操作数栈顶引用，GetRefFromTop(1) 返回从
+// 栈顶开始的倒数第二个引用
+func (ops *OperandStack) GetRefFromTop(n uint) *heap.Object {
+	return ops.slots[ops.size - 1 - n].ref
+}

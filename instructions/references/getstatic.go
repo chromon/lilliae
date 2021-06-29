@@ -19,7 +19,12 @@ func (gs *GET_STATIC) Execute(frame *runtimedataarea.Frame) {
 	// 解析符号引用，得到类的静态变量
 	field := fieldRef.ResolvedField()
 	class := field.Class()
-	// todo: init class
+	// 类的初始化
+	if !class.InitStarted() {
+		frame.RevertNextPC()
+		base.InitClass(frame.Thread(), class)
+		return
+	}
 
 	// 如果解析后的字段不是静态字段则抛出异常
 	if !field.IsStatic() {

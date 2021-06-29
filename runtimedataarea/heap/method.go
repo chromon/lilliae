@@ -12,6 +12,8 @@ type Method struct {
 	maxLocals uint
 	// 方法字节码
 	code []byte
+	// 方法参数在局部变量表中占用 slot 数量
+	argSlotCount uint
 }
 
 // 根据 class 文件中的方法信息创建 Method 表
@@ -22,6 +24,7 @@ func newMethods(class *Class, cfMethods []*classfile.MemberInfo) []*Method {
 		methods[i].class = class
 		methods[i].copyMemberInfo(cfMethod)
 		methods[i].copyAttributes(cfMethod)
+		methods[i].calcArgSlotCount()
 	}
 	return methods
 }
@@ -32,6 +35,22 @@ func (m *Method) copyAttributes(cfMethod *classfile.MemberInfo) {
 		m.maxStack = codeAttr.MaxStack()
 		m.maxLocals = codeAttr.MaxLocals()
 		m.code = codeAttr.Code()
+	}
+}
+
+// 计算方法参数数量
+func (m *Method) calcArgSlotCount() {
+	// 分解方法描述符，返回 MethodDescriptor 结构体
+	parsedDescriptor := parseMethodDescriptor(m.descriptor)
+	for _, paramType := range parsedDescriptor.parameterTypes {
+		m.argSlotCount++
+		if paramType == "J" || paramType == "D" {
+			m.argSlotCount++
+		}
+	}
+	if !m.IsStatic() {
+		// this 引用
+		m.argSlotCount++
 	}
 }
 
@@ -77,4 +96,8 @@ func (m *Method) MaxLocals() uint {
 
 func (m *Method) Code() []byte {
 	return m.code
+}
+
+func (m *Method) ArgSlotCount() uint {
+	return m.argSlotCount
 }

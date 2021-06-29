@@ -22,7 +22,12 @@ func (ps *PUT_STATIC) Execute(frame *runtimedataarea.Frame) {
 	// 解析符号引用，得到类的静态变量
 	field := fieldRef.ResolvedField()
 	class := field.Class()
-	// todo: init class
+	// 类的初始化
+	if !class.InitStarted() {
+		frame.RevertNextPC()
+		base.InitClass(frame.Thread(), class)
+		return
+	}
 
 	// 解析后字段是实例字段而非静态字段，则抛出异常
 	if !field.IsStatic() {

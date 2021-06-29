@@ -33,6 +33,8 @@ type Class struct {
 	staticSlotCount uint
 	// 静态变量
 	staticVars Slots
+	// 表示类的 <clinit> 方法是否已经开始执行
+	initStarted bool
 }
 
 func newClass(cf *classfile.ClassFile) *Class {
@@ -87,14 +89,6 @@ func (c *Class) IsEnum() bool {
 	return 0 != c.accessFlags&ACC_ENUM
 }
 
-func (c *Class) ConstantPool() *ConstantPool {
-	return c.constantPool
-}
-
-func (c *Class) StaticVars() Slots {
-	return c.staticVars
-}
-
 // 是否是可访问的 public 或 同一个包中，即是否有访问权限
 func (c *Class) isAccessibleTo(other *Class) bool {
 	return c.IsPublic() ||
@@ -114,6 +108,19 @@ func (c *Class) GetMainMethod() *Method {
 	return c.getStaticMethod("main", "([Ljava/lang/String;)V")
 }
 
+// 获取初始化方法
+func (c *Class) GetClinitMethod() *Method {
+	return c.getStaticMethod("<clinit>", "()V")
+}
+
+// 获取包名
+func (c *Class) GetPackageName() string {
+	if i := strings.LastIndex(c.name, "/"); i >= 0 {
+		return c.name[:i]
+	}
+	return ""
+}
+
 // 根据参数获取相关静态方法
 func (c *Class) getStaticMethod(name, descriptor string) *Method {
 	for _, method := range c.methods {
@@ -130,4 +137,36 @@ func (c *Class) getStaticMethod(name, descriptor string) *Method {
 // 新建对象
 func (c *Class) NewObject() *Object {
 	return newObject(c)
+}
+
+func (c *Class) Name() string {
+	return c.name
+}
+
+func (c *Class) ConstantPool() *ConstantPool {
+	return c.constantPool
+}
+
+func (c *Class) Fields() []*Field {
+	return c.fields
+}
+
+func (c *Class) Methods() []*Method {
+	return c.methods
+}
+
+func (c *Class) SuperClass() *Class {
+	return c.superClass
+}
+
+func (c *Class) StaticVars() Slots {
+	return c.staticVars
+}
+
+func (c *Class) InitStarted() bool {
+	return c.initStarted
+}
+
+func (c *Class) StartInit() {
+	c.initStarted = true
 }

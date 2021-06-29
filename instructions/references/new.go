@@ -18,7 +18,12 @@ func (n *NEW) Execute(frame *runtimedataarea.Frame) {
 	classRef := cp.GetConstant(n.Index).(*heap.ClassRef)
 	// 解析符号引用，得到类数据
 	class := classRef.ResolvedClass()
-	// todo: init class
+	// 类的初始化
+	if !class.InitStarted() {
+		frame.RevertNextPC()
+		base.InitClass(frame.Thread(), class)
+		return
+	}
 
 	// 接口和抽象类不能实例化，需要抛出异常
 	if class.IsInterface() || class.IsAbstract() {

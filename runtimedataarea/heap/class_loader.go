@@ -21,12 +21,15 @@ type ClassLoader struct {
 	// 记录已经加载的类数据，key 是类的完全限定名
 	// 方法区是一个抽象的概念，classMap 可以看做是方法区的具体实现
 	classMap map[string]*Class
+	// 是否打印类的加载信息
+	verboseFlag bool
 }
 
 // 创建 ClassLoader 实例
-func NewClassLoader(cp *classpath.Classpath) *ClassLoader {
+func NewClassLoader(cp *classpath.Classpath, verboseFlag bool) *ClassLoader {
 	return &ClassLoader{
 		cp: cp,
+		verboseFlag: verboseFlag,
 		classMap: make(map[string]*Class),
 	}
 }
@@ -51,7 +54,9 @@ func (cl *ClassLoader) loadNonArrayClass(name string) *Class {
 	class := cl.defineClass(data)
 	// 链接
 	link(class)
-	fmt.Printf("[Loaded %s from %s]\n", name, entry)
+	if cl.verboseFlag {
+		fmt.Printf("[Loaded %s from %s]\n", name, entry)
+	}
 	return class
 }
 

@@ -18,6 +18,10 @@ type Cmd struct {
 	args []string
 	// 指定 jre 目录位置
 	XjreOption string
+	// 是否把类加载信息输出到控制台
+	verboseClassFlag bool
+	// 是否把指令的执行信息输出到控制台
+	verboseInstFlag bool
 }
 
 // 使用 flag 包处理命令行选项
@@ -35,6 +39,10 @@ func parseCmd() *Cmd {
 	flag.StringVar(&cmd.cpOption, "cp", "", "classpath")
 	// 自定义非标准选项 -Xjre，用于指定 jre 目录位置
 	flag.StringVar(&cmd.XjreOption, "Xjre", "", "path to jre")
+
+	flag.BoolVar(&cmd.verboseClassFlag, "verbose", false, "enable verbose output")
+	flag.BoolVar(&cmd.verboseClassFlag, "verbose:class", false, "enable verbose output")
+	flag.BoolVar(&cmd.verboseInstFlag, "verbose:inst", false, "enable verbose output")
 
 	flag.Parse()
 

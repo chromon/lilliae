@@ -39,6 +39,15 @@ func (t *Thread) CurrentFrame() *Frame {
 	return t.stack.top()
 }
 
+// 返回栈顶元素
+func (t *Thread) TopFrame() *Frame {
+	return t.stack.top()
+}
+
 func (t *Thread) NewFrame(method *heap.Method) *Frame {
 	return newFrame(t, method)
+}
+
+func (t *Thread) IsStackEmpty() bool {
+	return t.stack.isEmpty()
 }
