@@ -41,6 +41,11 @@ func (cl *ClassLoader) LoadClass(name string) *Class {
 		return class
 	}
 
+	// 如果要加载的类是数组类，则调用 loadArrayClass 方法
+	if name[0] == '[' {
+		return cl.loadArrayClass(name)
+	}
+
 	return cl.loadNonArrayClass(name)
 }
 
@@ -57,6 +62,23 @@ func (cl *ClassLoader) loadNonArrayClass(name string) *Class {
 	if cl.verboseFlag {
 		fmt.Printf("[Loaded %s from %s]\n", name, entry)
 	}
+	return class
+}
+
+// 加载数组类
+func (cl *ClassLoader) loadArrayClass(name string) *Class {
+	class := &Class{
+		accessFlags: ACC_PUBLIC, // todo
+		name:        name,
+		loader:      cl,
+		initStarted: true, // 数组类不需要初始化
+		superClass:  cl.LoadClass("java/lang/Object"),
+		interfaces: []*Class{
+			cl.LoadClass("java/lang/Cloneable"),
+			cl.LoadClass("java/io/Serializable"),
+		},
+	}
+	cl.classMap[name] = class
 	return class
 }
 

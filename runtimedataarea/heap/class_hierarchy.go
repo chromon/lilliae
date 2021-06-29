@@ -11,11 +11,45 @@ func (c *Class) isAssignableFrom(other *Class) bool {
 		return true
 	}
 
-	if !t.IsInterface() {
-		return s.IsSubClassOf(t)
+	if !s.IsArray() {
+		if !s.IsInterface() {
+			// s is class
+			if !t.IsInterface() {
+				// t is not interface
+				return s.IsSubClassOf(t)
+			} else {
+				// t is interface
+				return s.IsImplements(t)
+			}
+		} else {
+			// s is interface
+			if !t.IsInterface() {
+				// t is not interface
+				return t.isJlObject()
+			} else {
+				// t is interface
+				return t.isSuperInterfaceOf(s)
+			}
+		}
 	} else {
-		return s.IsImplements(t)
+		// s is array
+		if !t.IsArray() {
+			if !t.IsInterface() {
+				// t is class
+				return t.isJlObject()
+			} else {
+				// t is interface
+				return t.isJlCloneable() || t.isJioSerializable()
+			}
+		} else {
+			// t is array
+			sc := s.ComponentClass()
+			tc := t.ComponentClass()
+			return sc == tc || tc.isAssignableFrom(sc)
+		}
 	}
+
+	return false
 }
 
 // 判断是否是子类，判断 S 是否是 T 的子类，实际上也就是判断 T 是否是 S 的（直接或间接）超类
@@ -55,4 +89,8 @@ func (c *Class) isSubInterfaceOf(iface *Class) bool {
 // class extends c
 func (c *Class) IsSuperClassOf(other *Class) bool {
 	return other.IsSubClassOf(c)
+}
+
+func (c *Class) isSuperInterfaceOf(iface *Class) bool {
+	return iface.isSubInterfaceOf(c)
 }

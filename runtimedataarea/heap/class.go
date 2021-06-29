@@ -170,3 +170,27 @@ func (c *Class) InitStarted() bool {
 func (c *Class) StartInit() {
 	c.initStarted = true
 }
+
+func (c *Class) Loader() *ClassLoader {
+	return c.loader
+}
+
+// 返回与类对应的数组类
+func (c *Class) ArrayClass() *Class {
+	// 根据类名得到数组类名
+	arrayClassName := getArrayClassName(c.name)
+	// 调用类加载器加载数组类
+	return c.loader.LoadClass(arrayClassName)
+}
+
+func (c *Class) isJlObject() bool {
+	return c.name == "java/lang/Object"
+}
+
+func (c *Class) isJlCloneable() bool {
+	return c.name == "java/lang/Cloneable"
+}
+
+func (c *Class) isJioSerializable() bool {
+	return c.name == "java/io/Serializable"
+}

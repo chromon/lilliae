@@ -5,14 +5,14 @@ type Object struct {
 	// 存放对象的 Class 指针
 	class *Class
 	// 存放实例变量
-	fields Slots
+	data interface{}
 }
 
 // 新建对象
 func newObject(class *Class) *Object {
 	return &Object{
 		class:  class,
-		fields: newSlots(class.instanceSlotCount),
+		data: newSlots(class.instanceSlotCount),
 	}
 }
 
@@ -20,8 +20,9 @@ func newObject(class *Class) *Object {
 func (obj *Object) Class() *Class {
 	return obj.class
 }
+
 func (obj *Object) Fields() Slots {
-	return obj.fields
+	return obj.data.(Slots)
 }
 
 // 判断对象是否是某个类的实例
