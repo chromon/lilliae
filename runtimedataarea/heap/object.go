@@ -29,3 +29,16 @@ func (obj *Object) Fields() Slots {
 func (obj *Object) IsInstanceOf(class *Class) bool {
 	return class.isAssignableFrom(obj.class)
 }
+
+// 直接给对象的引用类型实例变量赋值
+func (obj *Object) SetRefVar(name, descriptor string, ref *Object) {
+	field := obj.class.getField(name, descriptor, false)
+	slots := obj.data.(Slots)
+	slots.SetRef(field.slotId, ref)
+}
+
+func (obj *Object) GetRefVar(name, descriptor string) *Object {
+	field := obj.class.getField(name, descriptor, false)
+	slots := obj.data.(Slots)
+	return slots.GetRef(field.slotId)
+}

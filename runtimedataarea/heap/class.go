@@ -194,3 +194,16 @@ func (c *Class) isJlCloneable() bool {
 func (c *Class) isJioSerializable() bool {
 	return c.name == "java/io/Serializable"
 }
+
+// 根据字段名和描述符查找字段
+func (c *Class) getField(name, descriptor string, isStatic bool) *Field {
+	for cl := c; cl != nil; cl = cl.superClass {
+		for _, field := range cl.fields {
+			if field.IsStatic() == isStatic &&
+					field.name == name && field.descriptor == descriptor {
+				return field
+			}
+		}
+	}
+	return nil
+}

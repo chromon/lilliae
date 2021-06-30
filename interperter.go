@@ -10,15 +10,30 @@ import (
 
 // 解释器
 // logInst 控制是否把指令执行信息打印到控制台
-func interpret(method *heap.Method, logInst bool) {
+func interpret(method *heap.Method, logInst bool, args []string) {
 	// 创建 Thread 实例
 	thread := runtimedataarea.NewThread()
 	// 创建栈帧并推入虚拟机栈顶
 	frame := thread.NewFrame(method)
 	thread.PushFrame(frame)
 
+	// 将 args 参数转换成 java 字符串数组
+	jArgs := createArgsArray(method.Class().Loader(), args)
+	frame.LocalVars().SetRef(0, jArgs)
+
 	defer catchErr(thread)
 	loop(thread, logInst)
+}
+
+// 将 args 参数转换成 java 字符串数组
+func createArgsArray(loader *heap.ClassLoader, args []string) *heap.Object {
+	stringClass := loader.LoadClass("java/lang/String")
+	argsArr := stringClass.ArrayClass().NewArray(uint(len(args)))
+	jArgs := argsArr.Refs()
+	for i, arg := range args {
+		jArgs[i] = heap.JString(loader, arg)
+	}
+	return argsArr
 }
 
 func catchErr(thread *runtimedataarea.Thread) {

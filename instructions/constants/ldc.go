@@ -3,6 +3,7 @@ package constants
 import (
 	"lilliae/instructions/base"
 	"lilliae/runtimedataarea"
+	"lilliae/runtimedataarea/heap"
 )
 
 // ldc 系列指令从运行时常量池中加载常量值，并把它推入操作数栈。
@@ -30,15 +31,19 @@ func (lw *LDC_W) Execute(frame *runtimedataarea.Frame) {
 
 func _ldc(frame *runtimedataarea.Frame, index uint) {
 	stack := frame.OperandStack()
-	cp := frame.Method().Class().ConstantPool()
-	c := cp.GetConstant(index)
+	class := frame.Method().Class()
+	c := class.ConstantPool().GetConstant(index)
 
 	switch c.(type) {
 	case int32:
 		stack.PushInt(c.(int32))
 	case float32:
 		stack.PushFloat(c.(float32))
-	// case string:
+	case string:
+		// 如果 ldc 试图从运行时常量池中加载字符串常量，则先通过常量拿到 Go 字符串，
+		// 然后把它转成 Java 字符串实例并把引用推入操作数栈顶
+		internedStr := heap.JString(class.Loader(), c.(string))
+		stack.PushRef(internedStr)
 	// case *heap.ClassRef:
 	// case MethodType, MethodHandle
 	default:

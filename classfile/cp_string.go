@@ -8,7 +8,7 @@ CONSTANT_String_info {
  */
 
 // CONSTANT_String_info 常量表示 java.lang.String 字面量
-// CONSTANT_String_info本身并不存放字符串数据，只存放常量池索引，
+// CONSTANT_String_info 本身并不存放字符串数据，只存放常量池索引，
 // 这个索引指向一个 CONSTANT_Utf8_info 常量
 type ConstantStringInfo struct {
 	cp ConstantPool
