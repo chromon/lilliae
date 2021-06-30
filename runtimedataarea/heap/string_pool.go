@@ -18,7 +18,7 @@ func JString(loader *ClassLoader, goStr string) *Object {
 	// 先把 Go 字符串（UTF8 格式）转换成 Java 字符数组（UTF16 格式）
 	chars := stringToUtf16(goStr)
 	// 创建 java 字符串对象实例
-	jChars := &Object{loader.LoadClass("[C"), chars}
+	jChars := &Object{loader.LoadClass("[C"), chars, nil}
 
 	jStr := loader.LoadClass("java/lang/String").NewObject()
 	// 将 java 字符串的 value 变量设置成刚刚转换而来的字符数组
@@ -50,4 +50,15 @@ func utf16ToString(s []uint16) string {
 	runes := utf16.Decode(s) // func Decode(s []uint16) []rune
 	// 强转成 go 字符串
 	return string(runes)
+}
+
+// 检查字符串常量池中是否有当前字符串，如果没有则放入并返回该字符串，否则找到并直接返回
+func InternString(jStr *Object) *Object {
+	goStr := GoString(jStr)
+	if internedStr, ok := internedStrings[goStr]; ok {
+		return internedStr
+	}
+
+	internedStrings[goStr] = jStr
+	return jStr
 }

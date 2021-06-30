@@ -35,6 +35,8 @@ type Class struct {
 	staticVars Slots
 	// 表示类的 <clinit> 方法是否已经开始执行
 	initStarted bool
+	// java.lang.Class 实例
+	jClass *Object
 }
 
 func newClass(cf *classfile.ClassFile) *Class {
@@ -155,6 +157,19 @@ func (c *Class) Methods() []*Method {
 	return c.methods
 }
 
+func (c *Class) JClass() *Object {
+	return c.jClass
+}
+
+func (c *Class) SetJClass(jClass *Object) {
+	c.jClass = jClass
+}
+
+// 转换成 Java 字符串（格式：例如 java.lang.Object）
+func (c *Class) JavaName() string {
+	return strings.Replace(c.name, "/", ".", -1)
+}
+
 func (c *Class) SuperClass() *Class {
 	return c.superClass
 }
@@ -195,6 +210,12 @@ func (c *Class) isJioSerializable() bool {
 	return c.name == "java/io/Serializable"
 }
 
+// 判断类是否是基本类型的类
+func (c *Class) IsPrimitive() bool {
+	_, ok := primitiveTypes[c.name]
+	return ok
+}
+
 // 根据字段名和描述符查找字段
 func (c *Class) getField(name, descriptor string, isStatic bool) *Field {
 	for cl := c; cl != nil; cl = cl.superClass {
@@ -206,4 +227,31 @@ func (c *Class) getField(name, descriptor string, isStatic bool) *Field {
 		}
 	}
 	return nil
+}
+
+func (c *Class) getMethod(name, descriptor string, isStatic bool) *Method {
+	for cl := c; cl != nil; cl = cl.superClass {
+		for _, method := range cl.methods {
+			if method.IsStatic() == isStatic &&
+				method.name == name &&
+				method.descriptor == descriptor {
+
+				return method
+			}
+		}
+	}
+	return nil
+}
+
+func (c *Class) GetRefVar(fieldName, fieldDescriptor string) *Object {
+	field := c.getField(fieldName, fieldDescriptor, true)
+	return c.staticVars.GetRef(field.slotId)
+}
+func (c *Class) SetRefVar(fieldName, fieldDescriptor string, ref *Object) {
+	field := c.getField(fieldName, fieldDescriptor, true)
+	c.staticVars.SetRef(field.slotId, ref)
+}
+
+func (c *Class) GetInstanceMethod(name, descriptor string) *Method {
+	return c.getMethod(name, descriptor, false)
 }

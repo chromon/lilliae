@@ -106,3 +106,14 @@ func (ops *OperandStack) PopSlot() Slot {
 func (ops *OperandStack) GetRefFromTop(n uint) *heap.Object {
 	return ops.slots[ops.size - 1 - n].ref
 }
+
+func (ops *OperandStack) PushBoolean(val bool) {
+	if val {
+		ops.PushInt(1)
+	} else {
+		ops.PushInt(0)
+	}
+}
+func (ops *OperandStack) PopBoolean() bool {
+	return ops.PopInt() == 1
+}

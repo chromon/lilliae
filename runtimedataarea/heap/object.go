@@ -6,6 +6,8 @@ type Object struct {
 	class *Class
 	// 存放实例变量
 	data interface{}
+	// 用来记录 Object 结构体实例的额外信息
+	extra interface{}
 }
 
 // 新建对象
@@ -41,4 +43,12 @@ func (obj *Object) GetRefVar(name, descriptor string) *Object {
 	field := obj.class.getField(name, descriptor, false)
 	slots := obj.data.(Slots)
 	return slots.GetRef(field.slotId)
+}
+
+func (obj *Object) Extra() interface{} {
+	return obj.extra
+}
+
+func (obj *Object) SetExtra(extra interface{}) {
+	obj.extra = extra
 }

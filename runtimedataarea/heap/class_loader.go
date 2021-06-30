@@ -27,26 +27,80 @@ type ClassLoader struct {
 
 // 创建 ClassLoader 实例
 func NewClassLoader(cp *classpath.Classpath, verboseFlag bool) *ClassLoader {
-	return &ClassLoader{
-		cp: cp,
+	loader := &ClassLoader{
+		cp:          cp,
 		verboseFlag: verboseFlag,
-		classMap: make(map[string]*Class),
+		classMap:    make(map[string]*Class),
 	}
+
+	loader.loadBasicClasses()
+	loader.loadPrimitiveClasses()
+	return loader
+}
+
+// 加载 java.lang.Class 类
+func (cl *ClassLoader) loadBasicClasses() {
+	// 加载 java.lang.Class 类
+	jlClassClass := cl.LoadClass("java/lang/Class")
+	// 同时又触发 java.lang.Object 等类和接口的加载
+	for _, class := range cl.classMap {
+		if class.jClass == nil {
+			// 给已经加载的每一个类关联类对象
+			class.jClass = jlClassClass.NewObject()
+			class.jClass.extra = class
+		}
+	}
+}
+
+// 加载 void 和基本类型的类
+func (cl *ClassLoader) loadPrimitiveClasses() {
+	for primitiveType, _ := range primitiveTypes {
+		// primitiveType 是 void、int、float 等类型
+		cl.loadPrimitiveClass(primitiveType)
+	}
+}
+
+// 生成 void 和基本类型类
+// 有三点需要注意：
+// 第一，void和基本类型的类名就是 void、int、float 等。
+// 第二，基本类型的类没有超类，也没有实现任何接口。
+// 第三，非基本类型的类对象是通过 ldc 指令加载到操作数栈中的。而基本类型的类对象，
+// 虽然在 Java 代码中看起来是通过字面量获取的，但是编译之后的指令并不是 ldc，
+// 而是 getstatic。每个基本类型都有一个包装类，包装类中有一个静态常量，叫作 TYPE，其中存放的就是基本类型的类
+func (cl *ClassLoader) loadPrimitiveClass(className string) {
+	class := &Class {
+		accessFlags: ACC_PUBLIC, // todo
+		name:        className,
+		loader:      cl,
+		initStarted: true,
+	}
+	class.jClass = cl.classMap["java/lang/Class"].NewObject()
+	class.jClass.extra = class
+	cl.classMap[className] = class
 }
 
 // 将类数据加载到方法区
 func (cl *ClassLoader) LoadClass(name string) *Class {
 	if class, ok := cl.classMap[name]; ok {
-		// 类已经加载
+		// 类已经被加载
 		return class
 	}
 
-	// 如果要加载的类是数组类，则调用 loadArrayClass 方法
-	if name[0] == '[' {
-		return cl.loadArrayClass(name)
+	var class *Class
+	if name[0] == '[' { // 数组类
+		class = cl.loadArrayClass(name)
+	} else {
+		class = cl.loadNonArrayClass(name)
 	}
 
-	return cl.loadNonArrayClass(name)
+	// 在类加载完之后，查看 java.lang.Class 是否已经加载
+	if jlClassClass, ok := cl.classMap["java/lang/Class"]; ok {
+		// 给类关联类对象
+		class.jClass = jlClassClass.NewObject()
+		class.jClass.extra = class
+	}
+
+	return class
 }
 
 // 加载非数组类

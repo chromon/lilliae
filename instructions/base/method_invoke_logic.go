@@ -1,7 +1,6 @@
 package base
 
 import (
-	"fmt"
 	"lilliae/runtimedataarea"
 	"lilliae/runtimedataarea/heap"
 )
@@ -27,16 +26,6 @@ func InvokeMethod(invokerFrame *runtimedataarea.Frame, method *heap.Method) {
 		for i := argSlotCount - 1; i >= 0; i-- {
 			slot := invokerFrame.OperandStack().PopSlot()
 			newFrame.LocalVars().SetSlot(uint(i), slot)
-		}
-	}
-
-	// hack!
-	if method.IsNative() {
-		if method.Name() == "registerNatives" {
-			thread.PopFrame()
-		} else {
-			panic(fmt.Sprintf("native method: %v.%v%v\n",
-				method.Class().Name(), method.Name(), method.Descriptor()))
 		}
 	}
 }

@@ -44,7 +44,13 @@ func _ldc(frame *runtimedataarea.Frame, index uint) {
 		// 然后把它转成 Java 字符串实例并把引用推入操作数栈顶
 		internedStr := heap.JString(class.Loader(), c.(string))
 		stack.PushRef(internedStr)
-	// case *heap.ClassRef:
+	case *heap.ClassRef:
+		// 加载类对象
+		// 如果运行时，常量池中的常量是类引用，则解析类引用，
+		// 然后把类的类对象推入操作数栈顶
+		classRef := c.(*heap.ClassRef)
+		classObj := classRef.ResolvedClass().JClass()
+		stack.PushRef(classObj)
 	// case MethodType, MethodHandle
 	default:
 		panic("todo: ldc!")
