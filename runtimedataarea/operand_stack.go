@@ -117,3 +117,11 @@ func (ops *OperandStack) PushBoolean(val bool) {
 func (ops *OperandStack) PopBoolean() bool {
 	return ops.PopInt() == 1
 }
+
+// 清空操作数栈
+func (ops *OperandStack) Clear() {
+	ops.size = 0
+	for i := range ops.slots {
+		ops.slots[i].ref = nil
+	}
+}

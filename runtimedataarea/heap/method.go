@@ -14,6 +14,9 @@ type Method struct {
 	code []byte
 	// 方法参数在局部变量表中占用 slot 数量
 	argSlotCount uint
+	// 异常表
+	exceptionTable ExceptionTable
+	lineNumberTable *classfile.LineNumberTableAttribute
 }
 
 // 根据 class 文件中的方法信息创建 Method 表
@@ -45,6 +48,9 @@ func (m *Method) copyAttributes(cfMethod *classfile.MemberInfo) {
 		m.maxStack = codeAttr.MaxStack()
 		m.maxLocals = codeAttr.MaxLocals()
 		m.code = codeAttr.Code()
+		m.lineNumberTable = codeAttr.LineNumberTableAttribute()
+		m.exceptionTable = newExceptionTable(codeAttr.ExceptionTable(),
+			m.class.constantPool)
 	}
 }
 
@@ -133,4 +139,23 @@ func (m *Method) Code() []byte {
 
 func (m *Method) ArgSlotCount() uint {
 	return m.argSlotCount
+}
+
+// 搜索异常处理表
+func (m *Method) FindExceptionHandler(exClass *Class, pc int) int {
+	handler := m.exceptionTable.findExceptionHandler(exClass, pc)
+	if handler != nil {
+		return handler.handlerPC
+	}
+	return -1
+}
+
+func (m *Method) GetLineNumber(pc int) int {
+	if m.IsNative() {
+		return -2
+	}
+	if m.lineNumberTable == nil {
+		return -1
+	}
+	return m.lineNumberTable.GetLineNumber(pc)
 }

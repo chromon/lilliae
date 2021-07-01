@@ -53,3 +53,7 @@ func (f *Frame) SetNextPC(nextPC int) {
 func (f *Frame) RevertNextPC() {
 	f.nextPC = f.thread.pc
 }
+
+func (f *Thread) GetFrames() []*Frame {
+	return f.stack.getFrames()
+}

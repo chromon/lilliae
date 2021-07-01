@@ -37,6 +37,7 @@ type Class struct {
 	initStarted bool
 	// java.lang.Class 实例
 	jClass *Object
+	sourceFile string
 }
 
 func newClass(cf *classfile.ClassFile) *Class {
@@ -48,6 +49,7 @@ func newClass(cf *classfile.ClassFile) *Class {
 	class.constantPool = newConstantPool(class, cf.ConstantPool())
 	class.fields = newFields(class, cf.Fields())
 	class.methods = newMethods(class, cf.Methods())
+	class.sourceFile = getSourceFile(cf)
 	return class
 }
 
@@ -254,4 +256,15 @@ func (c *Class) SetRefVar(fieldName, fieldDescriptor string, ref *Object) {
 
 func (c *Class) GetInstanceMethod(name, descriptor string) *Method {
 	return c.getMethod(name, descriptor, false)
+}
+
+func (c *Class) SourceFile() string {
+	return c.sourceFile
+}
+
+func getSourceFile(cf *classfile.ClassFile) string {
+	if sfAttr := cf.SourceFileAttribute(); sfAttr != nil {
+		return sfAttr.FileName()
+	}
+	return "Unknown"
 }
